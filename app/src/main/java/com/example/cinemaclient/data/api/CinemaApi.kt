@@ -17,6 +17,11 @@ interface CinemaApi {
         @Query("date") date: String
     ): List<SessionDto>
 
+    @GET("api/public/sessions/{id}/seats")
+    suspend fun getSessionSeats(
+        @Path("id") sessionId: Long
+    ): SessionSeatsResponse
+
     @POST("api/bookings")
     suspend fun createBooking(
         @Header("Authorization") token: String,
