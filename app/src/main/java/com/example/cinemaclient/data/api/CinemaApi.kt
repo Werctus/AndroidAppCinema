@@ -27,4 +27,27 @@ interface CinemaApi {
         @Header("Authorization") token: String,
         @Body request: BookingRequest
     ): BookingResponse
+
+    @POST("api/bookings/{id}/confirm")
+    suspend fun confirmBooking(
+        @Header("Authorization") token: String,
+        @Path("id") bookingId: Long
+    ): BookingResponse
+
+    @GET("api/bookings/my")
+    suspend fun getMyBookings(
+        @Header("Authorization") token: String
+    ): List<BookingResponse>
+
+    @DELETE("api/bookings/{id}")
+    suspend fun cancelBooking(
+        @Header("Authorization") token: String,
+        @Path("id") bookingId: Long
+    )
+
+    @GET("api/bookings/{id}/ticket")
+    suspend fun getTicket(
+        @Header("Authorization") token: String,
+        @Path("id") bookingId: Long
+    ): TicketInfo
 }
