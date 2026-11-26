@@ -5,6 +5,12 @@ data class MovieDto(
     val title: String,
     val duration: Int,
     val ageRating: String?,
+    val releaseDate: String? = null,
     val posterUrl: String?,
     val genres: List<String>?
+)
+
+data class GenreDto(
+    val id: Long,
+    val name: String
 )

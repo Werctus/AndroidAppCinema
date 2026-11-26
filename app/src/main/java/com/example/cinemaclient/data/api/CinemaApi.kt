@@ -8,8 +8,17 @@ interface CinemaApi {
     @POST("api/auth/login")
     suspend fun login(@Body request: LoginRequest): AuthResponse
 
+    @POST("api/auth/register")
+    suspend fun register(@Body request: RegisterRequest): UserResponse
+
     @GET("api/public/movies")
     suspend fun getMovies(): List<MovieDto>
+
+    @GET("api/public/movies/search")
+    suspend fun searchMovies(@Query("query") query: String): List<MovieDto>
+
+    @GET("api/public/movies/genres")
+    suspend fun getGenres(): List<GenreDto>
 
     @GET("api/public/movies/{id}/sessions")
     suspend fun getSessions(
@@ -24,30 +33,24 @@ interface CinemaApi {
 
     @POST("api/bookings")
     suspend fun createBooking(
-        @Header("Authorization") token: String,
         @Body request: BookingRequest
     ): BookingResponse
 
     @POST("api/bookings/{id}/confirm")
     suspend fun confirmBooking(
-        @Header("Authorization") token: String,
         @Path("id") bookingId: Long
     ): BookingResponse
 
     @GET("api/bookings/my")
-    suspend fun getMyBookings(
-        @Header("Authorization") token: String
-    ): List<BookingResponse>
+    suspend fun getMyBookings(): List<BookingResponse>
 
     @DELETE("api/bookings/{id}")
     suspend fun cancelBooking(
-        @Header("Authorization") token: String,
         @Path("id") bookingId: Long
     )
 
     @GET("api/bookings/{id}/ticket")
     suspend fun getTicket(
-        @Header("Authorization") token: String,
         @Path("id") bookingId: Long
     ): TicketInfo
 }

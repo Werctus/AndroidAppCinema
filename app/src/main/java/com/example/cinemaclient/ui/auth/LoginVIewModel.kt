@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// Состояния экрана входа
 sealed interface LoginUiState {
     object Idle : LoginUiState
     object Loading : LoginUiState
@@ -26,24 +25,53 @@ class LoginViewModel @Inject constructor(
     private val _loginState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val loginState: StateFlow<LoginUiState> = _loginState.asStateFlow()
 
+    init {
+        checkExistingSession()
+    }
+
+    private fun checkExistingSession() {
+        viewModelScope.launch {
+            val token = authRepository.getToken()
+            if (!token.isNullOrBlank()) {
+                _loginState.value = LoginUiState.Success(token)
+            }
+        }
+    }
+
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _loginState.value = LoginUiState.Loading
 
-            authRepository.login(email, password)
+            authRepository.login(email.trim(), password)
                 .onSuccess { response ->
-                    // Успех: передаем токен дальше
                     _loginState.value = LoginUiState.Success(response.token)
                 }
                 .onFailure { exception ->
-                    // Ошибка: передаем сообщение пользователю
-                    val errorMsg = exception.message ?: "Неизвестная ошибка при входе"
+                    val errorMsg = exception.message ?: "Неверный email или пароль"
                     _loginState.value = LoginUiState.Error(errorMsg)
                 }
         }
     }
 
-    // Метод для сброса состояния (например, при возврате на экран)
+    fun register(email: String, password: String, firstName: String?, lastName: String?) {
+        viewModelScope.launch {
+            _loginState.value = LoginUiState.Loading
+
+            authRepository.register(
+                email = email.trim(),
+                password = password,
+                firstName = firstName?.trim()?.takeIf { it.isNotEmpty() },
+                lastName = lastName?.trim()?.takeIf { it.isNotEmpty() }
+            ).onSuccess {
+                // После успешной регистрации сразу выполняем вход
+                login(email, password)
+            }.onFailure { exception ->
+                val errorMsg = exception.message ?: "Ошибка при регистрации"
+                _loginState.value = LoginUiState.Error(errorMsg)
+            }
+        }
+    }
+
     fun resetState() {
         _loginState.value = LoginUiState.Idle
     }
